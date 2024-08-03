@@ -1,0 +1,104 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+data = pd.read_csv("diabetes.csv")
+data
+
+data.info()
+
+data.isnull().sum()
+
+data.describe()
+
+plt.figure(figsize =(10,8))
+sns.heatmap(data.corr(), annot = True, fmt='.3f',cmap= 'YlGnBu')
+plt.title("correlation heatmap")
+
+plt.figure(figsize= (10,8))
+kde = sns.kdeplot(data["Pregnancies"][data["Outcome"]==1], color = 'Red', shade = True)
+kde = sns.kdeplot(data["Pregnancies"][data["Outcome"]==0], color = 'Blue', shade = True)
+kde.set_xlabel('Pregnancies')
+kde.set_ylabel('Density')
+kde.legend(['Posiive','Negative'])
+
+plt.figure(figsize= (10,8))
+sns.violinplot(data=data, x='Outcome', y = 'Glucose', split= True, linewidth = 2, inner = 'quart')
+
+plt.figure(figsize= (10,8))
+kde = sns.kdeplot(data["Glucose"][data["Outcome"]==1], color = 'Red', shade = True)
+kde = sns.kdeplot(data["Glucose"][data["Outcome"]==0], color = 'Blue', shade = True)
+kde.set_xlabel('Glucose')
+kde.set_ylabel('Density')
+kde.legend(['Posiive','Negative'])
+
+data['Glucose'] = data['Glucose'].replace(0, data['Glucose'].median())
+
+data['BloodPressure'] = data['BloodPressure'].replace(0, data['BloodPressure'].median())
+
+data['BMI'] = data['BMI'].replace(0, data['BMI'].median())
+
+data['SkinThickness'] = data['SkinThickness'].replace(0, data['SkinThickness'].median())
+
+data['Insulin'] = data['Insulin'].replace(0, data['Insulin'].median())
+
+data
+
+X= data.drop(['Outcome'], axis =1)
+y = data['Outcome']
+
+X
+
+y
+
+from sklearn.model_selection import train_test_split
+
+X_train , X_test, y_train, y_test = train_test_split(X , y , test_size =0.33, random_state = 42)
+
+X_train
+
+y_train
+
+from sklearn.neighbors import KNeighborsClassifier
+
+training_accuracy= []
+test_accuracy = []
+for n_neighbors in range(1,11):
+    knn = KNeighborsClassifier(n_neighbors= n_neighbors)
+    knn.fit(X_train, y_train)
+    
+    training_accuracy.append(knn.score(X_train ,y_train))
+    test_accuracy.append(knn.score(X_test, y_test))
+
+plt.plot(range(1,11),test_accuracy, label= 'test_accuracy')
+plt.plot(range(1,11),test_accuracy, label= 'test_accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('n_neighbors')
+plt.legend()
+
+plt.plot(range(1,11),training_accuracy, label= 'training_accuracy')
+plt.plot(range(1,11),test_accuracy, label= 'test_accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('n_neighbors')
+plt.legend()
+
+knn = KNeighborsClassifier(n_neighbors =10)
+knn.fit(X_train, y_train)
+print(knn.score(X_train, y_train), ':Training_accuracy')
+print(knn.score(X_test, y_test), ':Test_accuracy')
+
+from sklearn.tree import DecisionTreeClassifier
+dtree = DecisionTreeClassifier(random_state = 0)
+dtree.fit(X_train, y_train)
+print(dtree.score(X_train, y_train), ':Training_accuracy')
+print(dtree.score(X_test, y_test), ':Test_accuracy')
+
+from sklearn.neural_network import MLPClassifier
+nlp = MLPClassifier(random_state =30)
+nlp.fit(X_train, y_train)
+print(nlp.score(X_train, y_train), ':Training_accuracy')
+print(nlp.score(X_test, y_test), ':Test_accuracy')
+
+
